@@ -1,0 +1,207 @@
+---
+title: "Gender and Nationality in the Tate Gallery Collection"
+output: "html_document"
+author: "Laura Mathilde Yong Li Nielsen"
+date: "2021-12-09"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Tate Gallery 
+Tate Gallery is a British Museum institution consisting of five museums or galleries in the United Kingdom. This code explores gender and nationality in terms of artists and pieces of artwork represented in the Tate archive/collection. The project seeks to dissect continuity and change in the collection and foresees change in terms of female artists representation the past centuries. 
+
+# Install packages
+```{r install packages}
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(gganimate)
+```
+
+## Read files
+
+```{r}
+artist <- read_csv("artist_clean.csv")
+
+artwork <- read_csv("artwork_clean.csv")
+```
+
+# Working with artist_clean.csv 
+
+## Female artists
+```{r creating values}
+gender <- artist$gender
+
+birth <- artist$birth
+
+```
+### Counting gender
+```{r counting gender}
+artist %>% 
+  count(gender)
+```
+
+### Using regular expressions (grepl) and filtering to create a new data frame (df) only with women  
+```{r filtering }
+femaleartist <- artist %>%
+  filter(grepl("Female", gender))
+
+femaleartist
+```
+
+### Development in female artists 
+```{r developoment over time}
+femaleartist%>%
+  count(birth, gender, nationality) %>%
+  ggplot(mapping = aes(x=birth, y=n))+ 
+  geom_col()+
+  labs(title= "Female artist in Tate Gallery")
+
+femaleartist
+```
+
+This plot shows the birth years of every female artist in the artist_clean.csv data set on the x-axis and the number of female artists born on the y-axis. 
+
+
+## Creating decades to improve and compare the prior plot 
+```{r change decades}
+
+artist[c("birth")]
+
+decade <- artist[c("birth", "gender")]
+
+# Changing interval in counting male, female and NA in gender in a century and copying them to my new df "CenturyGender". 
+filter(artist,birth %in% 1500:1599) %>% 
+  count(gender)
+
+CenturyGender <- data.frame(Century=c(16., 17., 18., 19., 20.),
+                            Male=c(17,70,377,904,1509),
+                            Female=c(0,1,13,94,404),
+                            Total=c(20,70,396,1025,1959),
+                            na=c(3,6,6,27,46))
+CenturyGender
+```
+
+### A plot with "Number of Female artists in the Tate Gallery Collection, 1500-1999"
+```{r using geom_col to plot female}
+CenturyGenderColFemale <- ggplot(CenturyGender, aes(Century, Female))+
+  geom_col()+
+  labs(title = "Number of Female artists in the Tate Gallery Collection, 1500-1999")
+
+CenturyGenderColFemale
+```
+
+###  A plot with "Number of Male artists in the Tate Gallery Collection, 1500-1999"
+```{r same but with male}
+CenturyGenderColMale <- ggplot(CenturyGender, aes(Century, Male))+
+  geom_col()+
+  labs(title = "Number of Male artists in the Tate Gallery Collection, 1500-1999")
+CenturyGenderColMale
+```
+
+These two visualizations show the number of male/female artists in the Tate Gallery Collection from 1500-1999.
+
+## Working with nationality: Indian born artists
+```{r reading the file}
+nationality <- read_csv("~/Desktop/Tate/artist_clean.csv")
+```
+
+### Filtering out Indian born artists
+```{r filter indian born artist}
+Indianartist <- nationality%>% 
+  filter(grepl("India", nationality))
+
+Indianartist
+```
+### Plotting with Indian born artists and gender
+```{r plotting with gender and artists}
+Indianartist%>% 
+  ggplot(mapping = aes(x=birth, y=name, colour= gender))+
+  geom_point()+
+  labs(title = "Indian born artists and Gender in the Tate Gallery Collection, 
+       1830-1980")
+```
+
+This plot shows birth year on the x-axis, names on the y-axis and gender is colored. 
+
+### Creating top 20 nationlity to work with gender and nationality
+```{r counting top 20}
+nationality %>%
+  count(nationality)
+```
+
+```{r arrange after count, show top 20}
+vec <- nationality$nationality
+top20nationality<- (sort(table(vec), decreasing = TRUE)[1:20])
+top20nationality
+```
+
+#### Creating af df with gender, birth, and nationaliy with top20nationality
+
+```{r}
+top20nationality1 <- nationality[nationality$nationality != "Denmark" & nationality$nationality != "NA" & nationality$nationality != "Zimbabwe" & nationality$nationality !="Zambia" & nationality$nationality !="Viet Nam" & nationality$nationality !="Venezuela" & nationality$nationality !="Ukraine" & nationality$nationality !="Uganda" & nationality$nationality !="Turkey" & nationality$nationality !="Tunis" & nationality$nationality != "The Czech Republic"
+                  & nationality$nationality !="Tanzania" & nationality$nationality != "Suriyah" & nationality$nationality != "Sweeden" & nationality$nationality !="Suomi" & nationality$nationality != "Sudan"
+                  & nationality$nationality != "Sir Lanka" & nationality$nationality != "South Korea" & nationality$nationality != "Slovenska Republika" & nationality$nationality != "Slovenia" & nationality$nationality != "Samoa" & nationality$nationality != "Romania" & nationality$nationality != "Portugal"
+                  & nationality$nationality != "Pilipinas" & nationality$nationality !="Peru" & nationality$nationality !="Panama" & nationality$nationality != "Pakistan" & nationality$nationality !="Norway" & nationality$nationality != "Nigeria" & nationality$nationality != "Nicaragua" & nationality$nationality != "New Zealnd" & nationality$nationality != "Myanmar" & nationality$nationality != "Moldova" & nationality$nationality != "Misr" & nationality$nationality != "México"
+                  & nationality$nationality != "Mauntius" & nationality$nationality != "Malta" & nationality$nationality != "Malaysia" & nationality$nationality != "Magyarorszag" & nationality$nationality != "Macedonia" & nationality$nationality != "Luxembourg"
+                  & nationality$nationality != "Lebanon" & nationality$nationality != "Lativa" & nationality$nationality != "Lao" & nationality$nationality !="Kenya" & nationality$nationality != "Jugoslavia" & nationality$nationality != "Jamaica" & nationality$nationality != "Israel" & nationality$nationality !="Island" & nationality$nationality !="Iraq" & nationality$nationality != "Indonesia"
+                  & nationality$nationality !="Hungary" & nationality$nationality != "Guyana" & nationality$nationality != "Greece" & nationality$nationality != "Estonia" & nationality$nationality != "Egypt" & nationality$nationality !="Départment de la" & nationality$nationality != "Danmark" & nationality$nationality !="D.C" & nationality$nationality != "Cuba"& nationality$nationality !="Croatia" & nationality$nationality != 
+                    "Costa Rica" & nationality$nationality !="Colombia" & nationality$nationality != "Chile" & nationality$nationality !="Ceská Republika" & nationality$nationality != "Cameroun" & nationality$nationality !="Budapest" & nationality$nationality != "Bosnien-Hercegovinia" & nationality$nationality !="Benin" & nationality$nationality !="Belarus"& nationality$nationality !="Barbados" & nationality$nationality !="Bangladesh" & nationality$nationality !="Bahmamas" & nationality$nationality != "Armenia" & nationality$nationality !="Argentina" & nationality$nationality !="Albania"& nationality$nationality !="Al-Lubnan"& nationality$nationality !="Al-Jazar'ir",]
+
+top20nationality1 <- top20nationality1[top20nationality1$nationality != "Slovenská Republika" & top20nationality1$nationality != "Sri Lanka" & top20nationality1$nationality != "Prathet Thai" & top20nationality1$nationality != "Perú" & top20nationality1$nationality != "Panamá"& top20nationality1$nationality != "New Zealand"& top20nationality1$nationality != "Mauritius"& top20nationality1$nationality != "Magyarország" & top20nationality1$nationality != "Jugoslavija"& top20nationality1$nationality != "Ísland" & top20nationality1$nationality != "Département de la" & top20nationality1$nationality != "D.C."& top20nationality1$nationality != "Choson Minjujuui In'min Konghwaguk"& top20nationality1$nationality != "Bulgaria"& top20nationality1$nationality != "Bosnien-Hercegovina"& top20nationality1$nationality != "Bénin"& top20nationality1$nationality != "Bahamas"& top20nationality1$nationality != "Al-Jaza'ir" & top20nationality1$nationality != "Îran",]
+top20nationality1
+```
+
+### A plot to compare gender and nationality
+```{r comparing gender}
+top20nationality1 <- na.omit(top20nationality1)
+
+top20nationality1%>% 
+  ggplot(mapping = aes(birth, nationality))+
+  geom_point(size=0.5)+
+  geom_count()+
+  facet_wrap(~gender, ncol = 10)+
+  theme(legend.position = "bottom")+
+  labs(title = "Female and Male artists from 20 countries in Tate Gallery Collection,
+  1500-2000")
+
+top20nationality1
+```
+
+This plot shows birth year on the x-axis, top20nationality on the y-axis, the two columns represent gender and "n" is the size of how many artists from a top20nation is represented in the data set. 
+
+The project wished to compare gender and nationality in one visualization. However, the workflow to do so was complicated. By using a negator to filter out every country not on the top20nationality, the plot was created. It was not possible to filter out the top20nationality. 
+
+# Working with artwork_clean.csv
+
+## Counting acquisition
+```{r counting acquisition}
+artwork %>% 
+  count(acquisition, sort = TRUE)
+```
+
+### Using ggplot to create a plot showing acquisition
+```{r using ggplot}
+artwork %>% 
+  count(acquisitionYear, acquisition) %>% 
+  ggplot(aes(x=acquisitionYear, y=n, colour=acquisition))+
+  geom_line()
+```
+
+By counting acquisition in line 172-175 it is evident, that "Accepted" is the most common method of obtaining artwork. Looking at the data set "artwork_clean.csv, all accepted pieces of artwork, except a few, were part of the J.M.W Turner bequest of 1856, the largest art donation ever. Therefore, the graph is disproportional. By removing "Accepted" from the code, a visualization of acquisition, without the Turner bequest, will be readable.To do so, the negator "!" was used.
+
+```{r making the plot readable}
+artwork %>% 
+  filter(acquisition != "Accepted") %>% 
+  count(acquisitionYear, acquisition) %>% 
+  ggplot(aes(x=acquisitionYear, y=n, colour=acquisition))+
+  geom_line()+
+  labs(title = "Tate Gallery Acquisition")
+```
+
+Here, the prior graph is improved and shows the general trends. It shows the year of acquisition on the x-axis and the number of artwork on the y-axis. The color is acquisition method. 
+
+# Final comments 
+
+This code has briefly examined gender and nationality in the Tate Gallery Archive. The workflow was characterized by a curious approach, and by working inductively, graphs were improved and new opportunities came forth along the way.By counting the top 20 nationality in the artist_clean.csv file, I found fewer Indian born artists than I expected. A discovery worth reflecting upon historically and culturally. The artwork_clean.csv data set showed the general trends in acquisition. However, the interpretation behind the metadata is necessary to access whether to repatriate or not. 
